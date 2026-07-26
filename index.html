@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulado CFO PCCE 2026 - Com Sistema de Save</title>
+  <style>
+    :root {
+      --primary: #1e3a8a;
+      --primary-hover: #1e40af;
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --correct: #10b981;
+      --incorrect: #ef4444;
+      --border: #cbd5e1;
+      --topic-bg: #eff6ff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 800px;
+      padding: 30px;
+      position: relative;
+    }
+
+    /* BARRA DE SAVE / UPLOAD */
+    .save-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 15px;
+      margin-bottom: 20px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .save-toolbar-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .save-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.82rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background-color: #fff;
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-sm:hover {
+      background-color: #e2e8f0;
+    }
+
+    .btn-save {
+      background-color: #dbeafe;
+      color: var(--primary);
+      border-color: #bfdbfe;
+    }
+
+    .btn-save:hover {
+      background-color: #bfdbfe;
+    }
+
+    .header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .header h1 {
+      font-size: 1.3rem;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge {
+      background-color: var(--topic-bg);
+      color: var(--primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 5px;
+      gap: 10px;
+    }
+
+    .jump-select {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+      background: #fff;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background-color: #e2e8f0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .question-title {
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .option-btn {
+      background-color: #fff;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 0.98rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      line-height: 1.4;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      border-color: var(--primary);
+      background-color: #f8fafc;
+    }
+
+    .option-btn.correct {
+      background-color: #d1fae5;
+      border-color: var(--correct);
+      color: #065f46;
+      font-weight: 600;
+    }
+
+    .option-btn.incorrect {
+      background-color: #fee2e2;
+      border-color: var(--incorrect);
+      color: #991b1b;
+    }
+
+    .option-btn:disabled {
+      cursor: not-allowed;
+    }
+
+    .footer-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #64748b;
+    }
+
+    .btn-secondary:hover {
+      background-color: #475569;
+    }
+
+    .btn:disabled {
+      background-color: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    .hide {
+      display: none !important;
+    }
+
+    .results {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .results h2 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--topic-bg);
+      border: 4px solid var(--primary);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin: 20px auto;
+    }
+
+    .score-num {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .score-total {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .percentage {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      .header h1 {
+        font-size: 1.1rem;
+      }
+      .save-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .save-actions {
+        justify-content: space-between;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- BARRA DE SAVE / LOAD DE ARQUIVO -->
+    <div class="save-toolbar">
+      <span class="save-toolbar-title">⚙️ Gerenciador de Progresso</span>
+      <div class="save-actions">
+        <button class="btn-sm btn-save" onclick="exportSave()" title="Baixar arquivo JSON com seu progresso">💾 Baixar Save</button>
+        <button class="btn-sm" onclick="document.getElementById('file-input').click()" title="Carregar arquivo JSON baixado anteriormente">📂 Carregar Save</button>
+        <button class="btn-sm" onclick="resetProgress()" title="Zerar todas as respostas">🗑️ Resetar</button>
+        <!-- Input de arquivo invisível -->
+        <input type="file" id="file-input" class="hide" accept=".json" onchange="importSave(event)">
+      </div>
+    </div>
+
+    <!-- Tela do Quiz -->
+    <div id="quiz-screen">
+      <div class="header">
+        <div class="header-top">
+          <h1>Simulado CFO PCCE 2026</h1>
+          <span class="badge" id="topic-badge">Tópico 1</span>
+        </div>
+        <div class="controls">
+          <span id="progress-text" style="font-weight: 600; font-size: 0.9rem;">Questão 1 de 100</span>
+          <div>
+            <label for="jump-select" style="font-size: 0.85rem; color: var(--text-muted);">Ir para:</label>
+            <select id="jump-select" class="jump-select" onchange="jumpToQuestion(this.value)">
+              <!-- Opções geradas via JS -->
+            </select>
+          </div>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="question-title" id="question-text">
+        <!-- Texto da pergunta -->
+      </div>
+
+      <div class="options" id="options-container">
+        <!-- Botões de alternativa -->
+      </div>
+
+      <div class="footer-nav">
+        <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()" disabled>Anterior</button>
+        <button class="btn" id="next-btn" onclick="nextQuestion()">Próxima</button>
+      </div>
+    </div>
+
+    <!-- Tela de Resultados -->
+    <div id="result-screen" class="results hide">
+      <h2>Simulado Concluído!</h2>
+      <p>Confira seu desempenho final no simulado de 100 questões:</p>
+      
+      <div class="score-circle">
+        <div class="score-num" id="score-num">0</div>
+        <div class="score-total">de 100 acertos</div>
+      </div>
+
+      <div class="percentage" id="percentage-text">0% de aproveitamento</div>
+
+      <button class="btn" onclick="restartQuiz()">Refazer Simulado</button>
+    </div>
+  </div>
+
+  <script>
+    // BANCO DE DADOS COMPLETO - 100 QUESTÕES DO SIMULADO CFO PCCE 2026
+    const questions = [
+      // TÓPICO 1
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "1. Qual atividade possui natureza essencialmente reativa, atuando post factum com o objetivo de subsidiar a opinio delicti?",
+        options: ["A) Inteligência Policial", "B) Investigação Criminal", "C) Contrainteligência", "D) Análise Criminológica"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "2. O produto clássico e final decorrente do Ciclo de Inteligência, destinado a assessorar o decisor estratégico, denomina-se:",
+        options: ["A) Inquérito Policial", "B) Auto de Prisão em Flagrante", "C) Relatório de Inteligência (RELINT)", "D) Relatório de Investigação Policial"],
+        answer: 2
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "3. A atuação proativa que visa à antecipação e mitigação de riscos potenciais à sociedade é própria da:",
+        options: ["A) Inteligência Policial", "B) Investigação Criminal", "C) Polícia Cartorária", "D) Execução Penal"],
+        answer: 0
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "4. Qual a ordem correta das fases que compõem o Ciclo de Inteligência Policial?",
+        options: ["A) Reunião, Difusão, Análise, Direção", "B) Direção, Reunião, Processamento/Análise, Difusão", "C) Análise, Difusão, Arquivamento, Coleta", "D) Triagem, Coleta, Formalização, Prisão"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "5. Na perspectiva da Inteligência Policial, o dado isolado e não processado é considerado:",
+        options: ["A) Prova cabal", "B) Indício suficiente", "C) Estéril, demandando análise e cruzamento", "D) Conhecimento pronto"],
+        answer: 2
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "6. A Investigação Criminal tem sua discricionariedade mitigada por qual princípio fundamental?",
+        options: ["A) Supremacia absoluta do interesse privado", "B) Garantismo penal", "C) Informalidade processual", "D) Efemeridade jurídica"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "7. Diferente da Inteligência, a Investigação Criminal vincula-se estritamente a:",
+        options: ["A) Código de Processo Penal e prazos exíguos", "B) Avaliações puramente prospectivas", "C) Mitigação de riscos políticos apenas", "D) Doutrina internacional Grey Man"],
+        answer: 0
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "8. Quando o Oficial Investigador realiza o cruzamento e a validação técnica de dados brutos, ele produz:",
+        options: ["A) Boato institucional", "B) Conhecimento útil", "C) Peça meramente ornamental", "D) Nulidade processual"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "9. O erro crasso apontado na gestão de seções de investigação consiste em:",
+        options: ["A) Utilizar a internet para investigações", "B) Confundir os conceitos e ritos de Investigação e Inteligência", "C) Seguir estritamente as ordens do Delegado de Polícia", "D) Redigir relatórios baseados em evidências materiais"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 1: Fundamentos da Investigação Criminal vs. Inteligência Policial",
+        question: "10. A destinação final do Inquérito Policial é subsidiar a denúncia do:",
+        options: ["A) Poder Judiciário", "B) Ministério Público", "C) Defensor Público", "D) Chefe de Seção"],
+        answer: 1
+      },
+
+      // TÓPICO 2
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "11. Qual autor sociológico é citado no manual para explicar a volatilidade das estruturas fluidas do crime transnacional?",
+        options: ["A) Ulrich Beck", "B) Zygmunt Bauman", "C) Sun Tzu", "D) Michel Foucault"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "12. Na 'Sociedade de Risco' de Ulrich Beck, o Oficial Investigador deve atuar focado na contenção de riscos:",
+        options: ["A) Unicamente visíveis e físicos", "B) Sistêmicos e muitas vezes invisíveis", "C) Exclusivamente climáticos", "D) Apenas midiáticos"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "13. Como se defende o narcotráfico moderno além do confronto físico com armas?",
+        options: ["A) Abandonando o uso do capital financeiro", "B) Por meio de bancas especializadas voltadas a anular inquéritos por falhas processuais", "C) Utilizando apenas armamento não letal", "D) Evitando a contratação de profissionais jurídicos"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "14. A transição da criminalidade clássica para as organizações corporativas modernas caracteriza-se por:",
+        options: ["A) Uma estrutura estritamente amadora e passional", "B) Uma ruptura estrutural com operação fluida e empresarial", "C) A total ausência de fins lucrativos", "D) Atuação restrita ao ambiente rural"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "15. Sob a ótica moderna da Segurança Pública, a Inteligência Policial nasce como resposta para:",
+        options: ["A) Estimular o instinto puramente reativo do Estado", "B) Favorecer a análise preditiva e a letalidade jurídica inquestionável", "C) Reduzir o nível técnico das polícias judiciárias", "D) Eliminar a necessidade de inquéritos formais"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "16. Nas organizações criminosas contemporâneas com lógica empresarial, a prisão de executores operacionais de rua representa:",
+        options: ["A) O desmantelamento definitivo da estrutura", "B) Uma despesa provisionada e facilmente reposta pelo grupo", "C) Um impacto financeiro insustentável para a chefia", "D) O fim imediato do tráfico de drogas local"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "17. Os riscos sistêmicos que o investigador moderno deve mitigar englobam:",
+        options: ["A) Vazamento de dados, danos à infraestrutura crítica e nulidades jurídicas", "B) Apenas insatisfação de cunho pessoal da equipe", "C) Alterações de trânsito em vias urbanas secundárias", "D) O número excessivo de viaturas padronizadas"],
+        answer: 0
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "18. A modernidade líquida altera o cenário criminal ao permitir que as organizações:",
+        options: ["A) Tornem-se rígidas e territorialmente estáticas", "B) Operem sem fronteiras e de maneira altamente volátil", "C) Dependam exclusivamente de comunicações via rádio amador", "D) Extingam a figura de líderes financeiros"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "19. Para que a resposta estatal seja considerada juridicamente letal, ela deve primar por:",
+        options: ["A) Velocidade sem observância de formalidades", "B) Técnica, legalidade e precisão processual contra nulidades", "C) Uso de força física generalizada e descontrolada", "D) Desconsideração de prazos processuais"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 2: A Evolução Criminal e a Mitigação de Riscos",
+        question: "20. A contenção de falhas processuais periféricas visa assegurar a:",
+        options: ["A) Impunidade dos criminosos corporativos", "B) Efetividade jurídica das ações estatais", "C) Extinção da cadeia de custódia", "D) Redução do efetivo policial em campo"],
+        answer: 1
+      },
+
+      // TÓPICO 3
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "21. A sigla OSINT refere-se à atividade de inteligência baseada em:",
+        options: ["A) Operações Silenciosas em Redes Internas", "B) Análise de Fontes Abertas (Open Source Intelligence)", "C) Extração de Operadores de Sistemas Criptografados", "D) Interceptação Telefônica Sem Ordem Judicial"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "22. Os dados EXIF presentes em arquivos fotográficos digitais são metadados que revelam:",
+        options: ["A) Apenas o nome completo do fotógrafo", "B) A geolocalização e o modelo do aparelho captor", "C) O CPF do investigado de forma criptografada", "D) A senha do e-mail do titular do celular"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "23. Segundo o julgamento do RHC nº 99.735/SC pelo STJ, as mensagens obtidas via WhatsApp Web sem autorização prévia são:",
+        options: ["A) Válidas, em razão do interesse público", "B) Provas ilícitas, gerando nulidade", "C) Consideradas meras irregularidades administrativas", "D) Suficientes para a condenação imediata"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "24. A Lei Geral de Proteção de Dados (LGPD) prevê exceções para o tratamento de dados pessoais destinados a:",
+        options: ["A) Fins exclusivamente comerciais de segurança", "B) Persecução penal e segurança pública, observando a finalidade estrita", "C) Qualquer tipo de investigação jornalística informal", "D) Acesso irrestrito por empresas privadas de vigilância"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "25. Para garantir a integridade técnica de uma prova digital coletada, o operador deve preservar o código:",
+        options: ["A) IMEI do aparelho celular", "B) Hash (como o SHA-256)", "C) PIN do chip telefônico", "D) IP dinâmico da rede pública"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "26. Se o Oficial Investigador acessa dados telemáticos sem autorização judicial, qual doutrina contamina as provas derivadas?",
+        options: ["A) Doutrina da Proteção Integral", "B) Doutrina dos Frutos da Árvore Envenenada", "C) Doutrina da Cegueira Inatencional", "D) Doutrina do Homem de Bronze"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "27. O ambiente virtual é classificado pela doutrina moderna como:",
+        options: ["A) Um território sem relevância probatória", "B) A nova via pública da criminalidade contemporânea", "C) Um espaço imune às leis brasileiras", "D) Competência exclusiva da agência reguladora ANATEL"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "28. A pegada digital de um alvo pode ser mapeada em quais camadas da internet?",
+        options: ["A) Apenas em sites de notícias estatais", "B) Nas camadas da Surface e Deep Web", "C) Exclusivamente em redes Wi-Fi desligadas", "D) Apenas na intranet do Tribunal de Justiça"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "29. A extração de metadados digitais serve principalmente para:",
+        options: ["A) Substituir os exames periciais tradicionais de DNA", "B) Trazer precisão factual à linha de apuração e autoria", "C) Coagir psicologicamente o suspeito em depoimento", "D) Evitar a instauração de inquérito policial"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 3: A Busca pela Prova (Ferramentas de Extração e OSINT)",
+        question: "30. Diante de um smartphone desbloqueado em flagrante, o Oficial Investigador deve:",
+        options: ["A) Realizar imediatamente o espelhamento das mensagens", "B) Aguardar autorização judicial específica para devassa telemática", "C) Apagar os registros de chamada para proteger o sigilo", "D) Vender os dados para agências de inteligência parceiras"],
+        answer: 1
+      },
+
+      // TÓPICO 4
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "31. A atividade de Inteligência Humana é internacionalmente conhecida pela sigla:",
+        options: ["A) SIGINT", "B) HUMINT", "C) OSINT", "D) GEOINT"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "32. Qual a primeira fase do ciclo de recrutamento tático de uma fonte humana?",
+        options: ["A) Avaliação de vulnerabilidades", "B) Identificação do alvo", "C) Aproximação social", "D) Gestão contínua"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "33. No trato com fontes humanas, o Oficial Investigador deve manter:",
+        options: ["A) Uma relação de amizade íntima e confiança cega", "B) Distanciamento profissional e ceticismo permanente", "C) Ocultamento total dos dados perante o Delegado", "D) Promessas de vantagens financeiras sem lastro"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "34. A denúncia anônima isolada não autoriza invasão domiciliar, exigindo antes a lavratura de uma:",
+        options: ["A) Ordem de prisão preventiva", "B) Verificação de Procedência das Informações (VPI) documentada", "C) Carta de cooperação internacional", "D) Ata notarial digital"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "35. O instituto formalizado pela Lei nº 12.850/2013 no qual o investigado colabora em troca de benefícios é a:",
+        options: ["A) Denúncia anônima qualificada", "B) Colaboração Premiada", "C) Transação penal tácita", "D) Suspensão condicional do processo"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "36. Qual o papel do Oficial Investigador na Colaboração Premiada?",
+        options: ["A) Negociar diretamente a redução da pena com o réu", "B) Produzir dados de corroboração e subsídio técnico para o Delegado", "C) Homologar o acordo na ausência do juiz de direito", "D) Conceder perdão judicial imediato em campo"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "37. As fontes humanas são movidas por motivações intrínsecas, tais como:",
+        options: ["A) Exclusivamente altruísmo social", "B) Vingança, ganância, ideologia ou rivalidade", "C) Cumprimento de ordens judiciais expressas", "D) Vínculos empregatícios formais com a AESP"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "38. A perda da objetividade na gestão de um informante coloca em risco:",
+        options: ["A) Apenas a velocidade de digitação dos autos", "B) O Inquérito Policial e a segurança física/jurídica do operador", "C) O orçamento anual de combustível da delegacia", "D) A publicação de editais de concurso público"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "39. Para onde deve ser enviado o resultado da Verificação de Procedência de Informações (VPI)?",
+        options: ["A) Diretamente para a imprensa local", "B) Para os autos do Inquérito Policial presidido pelo DPC", "C) Para a ouvidoria do suspeito investigado", "D) Para o arquivo morto sem numeração"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 4: HUMINT e a Gestão de Fontes Humanas",
+        question: "40. A principal característica do informante velado é:",
+        options: ["A) Possuir registro oficial em cartório com ampla publicidade", "B) Atuar no anonimato fornecendo dados de interesse policial", "C) Apresentar-se obrigatoriamente munido de advogado", "D) Prestar depoimento sob o rito do contraditório judicial"],
+        answer: 1
+      },
+
+      // TÓPICO 5
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "41. O termo utilizado para definir quando um policial velado é identificado por criminosos é:",
+        options: ["A) Saturado", "B) Plotado", "C) Mimetizado", "D) Blindado"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "42. A sigla EC no contexto das operações veladas significa:",
+        options: ["A) Evacuação de Campo", "B) Estória de Cobertura", "C) Elemento de Confronto", "D) Execução Cartorária"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "43. A Estória de Cobertura explora qual fenômeno psicológico do alvo adversário?",
+        options: ["A) Amnésia retrógrada", "B) Cegueira inatencional", "C) Complexo de superioridade", "D) Catatonia induzida"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "44. Qual das alternativas apresenta um exemplo de EC de alta eficiência citado no manual?",
+        options: ["A) Entrar na favela ostentando fardamento incompleto", "B) Mimetizar técnicos de concessionárias de utilidade pública ou logística de e-commerce", "C) Identificar-se verbalmente como policial civil de folga", "D) Utilizar veículos blindados com giroflex ligado"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "45. A Regra de Ouro da Estória de Cobertura determina que o adereço físico deve ser coerente com:",
+        options: ["A) O contracheque do Oficial Investigador", "B) O vocabulário, a linguagem corporal e a atitude da persona", "C) As ordens diretas da comarca vizinha", "D) O modelo de armamento longo ostentado"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "46. O Ciclo analítico de tomada de decisão que é quebrado no adversário pelas táticas de invisibilidade chama-se:",
+        options: ["A) Ciclo de Deming (PDCA)", "B) Ciclo OODA (Observar, Orientar, Decidir, Agir)", "C) Ciclo de Vida da Prova Digital", "D) Matriz de Swot Operacional"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "47. A 'Tática do Folião', consagrada pela Polícia Civil de São Paulo, consiste em se fantasiar no Carnaval para:",
+        options: ["A) Participar das festas sem fins profissionais", "B) Efetuar prisões aproximando-se das quadrilhas sem gerar alerta de ameaça", "C) Evitar o preenchimento de relatórios cartorários", "D) Promover a imagem institucional em redes sociais de forma ostentiva"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "48. Na 'Operação Marvel' executada no Peru, qual recurso foi utilizado para desarticular o ponto de tráfico?",
+        options: ["A) Uso de megafones nas vielas principais", "B) Agentes fantasiados de super-heróis simulando ida a evento escolar", "C) Ocupação militar por blindados do exército", "D) Corte total de energia e internet da comunidade"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "49. O mimetismo urbano bem-sucedido prioriza:",
+        options: ["A) A vaidade estética do operador de segurança", "B) A dissolução do operador na paisagem urbana do terreno", "C) O uso de distintivos em tamanho ampliado", "D) A verbalização em tom coercitivo de imediato"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 5: O Levantamento Velado, o Mimetismo e as Estórias de Cobertura (EC)",
+        question: "50. Caso a equipe seja plotada em campana por olheiros em área de facção, a diretriz correta é:",
+        options: ["A) Continuar no local simulando não ter visto nada", "B) Acionar a retração imediata, abortando a missão por segurança", "C) Iniciar tiroteio preventivo contra os olheiros", "D) Revelar a identidade policial e pedir apoio à imprensa"],
+        answer: 1
+      },
+
+      // TÓPICO 6
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "51. A verdadeira desarticulação de organizações criminosas estruturadas como corporações ocorre por meio da:",
+        options: ["A) Prisão repetida de pequenos traficantes locais", "B) Asfixia Financeira, atacando o fluxo de capitais e bens", "C) Realização de palestras educativas na comunidade", "D) Substituição imediata dos Delegados de Polícia"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "52. Quais são as três etapas clássicas do crime de Lavagem de Capitais?",
+        options: ["A) Coleta, Remessa e Ocultação", "B) Colocação, Ocultação/Estratificação e Integração", "C) Roubo, Depósito e Saque", "D) Apuração, Bloqueio e Confisco"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "53. O órgão federal responsável pela emissão dos Relatórios de Inteligência Financeira (RIF) é o:",
+        options: ["A) BNDES", "B) COAF (Conselho de Controle de Atividades Financeiras)", "C) Banco Central do Brasil", "D) Ministério da Fazenda"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "54. A tese firmada pelo STF no Tema 990 de Repercussão Geral estabelece que o compartilhamento do RIF com a polícia é:",
+        options: ["A) Inconstitucional em qualquer hipótese", "B) Constitucional, prescindindo de prévia autorização judicial", "C) Permitido apenas com autorização do Senado Federal", "D) Condicionado ao trânsito em julgado do processo penal"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "55. A etapa da lavagem de capitais na qual o dinheiro retorna à economia com aparência de licitude chama-se:",
+        options: ["A) Colocação", "B) Integração", "C) Estratificação", "D) Ocultação"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "56. A utilização de 'empresas de fachada' é comumente observada em qual fase da persecução patrimonial?",
+        options: ["A) No registro inicial da ocorrência de furto", "B) Na engenharia de ocultação e lavagem de capitais", "C) Na contratação de estagiários para o cartório", "D) No treinamento de tiro defensivo na AESP"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "57. Dominar a interface com o COAF permite ao Oficial Investigador atuar contra:",
+        options: ["A) Infrações leves de trânsito", "B) A cúpula estrutural e financeira das organizações criminosas", "C) A escala de plantão da delegacia plantonista", "D) Erros formais em folhas de pagamento do Estado"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "58. A 'Estratificação' na lavagem de dinheiro compreende:",
+        options: ["A) O primeiro depósito em dinheiro vivo no caixa", "B) Múltiplas transações financeiras para dificultar o rastreamento", "C) A compra direta de imóveis em nome do próprio réu", "D) O confisco judicial dos bens apreendidos"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "59. Os procedimentos fiscalizatórios da Receita Federal compartilhados sob o Tema 990 abarcam:",
+        options: ["A) Apenas dados parciais de identificação civil", "B) A íntegra dos procedimentos fiscalizatórios sem quebra ilegal de sigilo", "C) Informações exclusivas de segredo de estado militar", "D) Dados sigilosos de prontuários médicos da polícia"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 6: Rastreabilidade do Dinheiro e Asfixia Financeira",
+        question: "60. O crime organizado contemporâneo deve ser combatido sob uma ótica de:",
+        options: ["A) Delinquência puramente passional e desorganizada", "B) Lógica empresarial de mercado ilícito", "C) Ausência total de conexões financeiras", "D) Atividades criminosas sem repercussão econômica"],
+        answer: 1
+      },
+
+      // TÓPICO 7
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "61. Qual lei positivou o rigor da Cadeia de Custódia no Código de Processo Penal brasileiro?",
+        options: ["A) Lei Geral de Proteção de Dados (LGPD)", "B) Lei nº 13.964/2019 (Pacote Anticrime)", "C) Estatuto do Desarmamento", "D) Lei de Abuso de Autoridade"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "62. O Artigo 158-A do CPP define a cadeia de custódia como o conjunto de procedimentos para manter e documentar:",
+        options: ["A) O prontuário funcional dos investigadores", "B) A história cronológica do vestígio", "C) A escala de férias dos escrivães", "D) A estatística mensal de homicídios"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "63. Quantas etapas estão expressamente estipuladas no Artigo 158-B do CPP para o rito da cadeia de custódia?",
+        options: ["A) Cinco etapas", "B) Dez etapas", "C) Três etapas", "D) Doze etapas"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "64. Qual recurso emergencial e improvisado é recomendado para evitar o apagamento remoto (wiping) de smartphones?",
+        options: ["A) Envolver o aparelho em plástico bolha comum", "B) Envolver o smartphone em uma generosa camada de papel de alumínio", "C) Mergulhar o aparelho em água destilada", "D) Retirar a bateria à força com chave de fenda"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "65. O papel do alumínio em torno do eletrônico atua como uma barreira eletromagnética simulando uma:",
+        options: ["A) Rede neural artificial", "B) Gaiola de Faraday improvisada", "C) Conexão VPN segura", "D) Antena de transmissão de dados"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "66. A técnica moderna de interrogatório que repudia a coerção física e explora a exaustão mental do álibi chama-se:",
+        options: ["A) Tortura psicológica monitorada", "B) Entrevista Cognitiva", "C) Polígrafo analítico presencial", "D) Hipnose forense jurídica"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "67. O Princípio aplicado à redação do Relatório de Investigação que proíbe adjetivações dramáticas é o da:",
+        options: ["A) Subjetividade Institucional", "B) Objetividade Pragmática", "C) Proporcionalidade Estética", "D) Discricionariedade Narrativa"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "68. Qual a consequência processual da quebra irremediável da cadeia de custódia da prova?",
+        options: ["A) Validação da prova por equidade", "B) Aplicação da doutrina dos frutos da árvore envenenada com nulidade absoluta", "C) Apenas advertência formal ao escrivão do caso", "D) Aceleração do julgamento do réu em plenário"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "69. Durante a Entrevista Cognitiva, o momento ideal para apresentar a prova de OSINT ou ERB é:",
+        options: ["A) Logo no primeiro minuto do interrogatório", "B) Após o suspeito se comprometer irreversivelmente com uma narrativa falsa (álibi)", "C) Somente após o encerramento e assinatura do termo", "D) Antes mesmo do suspeito se sentar na sala de oitivas"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 7: A Materialização da Prova (A Cadeia de Custódia e a Blindagem)",
+        question: "70. Expressões como 'suspeito nervoso' ou 'indivíduo de altíssima periculosidade' no relatório policial devem ser:",
+        options: ["A) Estimuladas para impressionar o magistrado", "B) Evitadas, pois adjetivações e ilações subjetivas empobrecem a técnica do documento", "C) Utilizadas obrigatoriamente em todos os parágrafos", "D) Substituídas por termos de gíria policial urbana"],
+        answer: 1
+      },
+
+      // TÓPICO 8
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "71. A Ordem de Missão (OM) é um instrumento de lastro jurídico emanado exclusivamente pelo:",
+        options: ["A) Oficial Investigador Chefe da Seção", "B) Delegado de Polícia Civil (DPC)", "C) Promotor de Justiça Plantonista", "D) Juiz de Direito da Comarca"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "72. Agir rotineiramente em diligências de campo sem a devida cobertura da OM expõe a equipe a imputações de:",
+        options: ["A) Prevaricação culposa apenas", "B) Crime de abuso de autoridade e nulidade probatória", "C) Promoção funcional indevida", "D) Quebra de sigilo fiscal temporário"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "73. O documento que materializa o encerramento da diligência, narrando a cronologia tática exata, é o:",
+        options: ["A) RELINT", "B) Relatório de Ordem de Missão (ROM)", "C) Boletim de Ocorrência Policial", "D) Auto de Qualificação e Interrogatório"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "74. Para priorizar inquéritos sob escassez de recursos, o Oficial Investigador adota a ferramenta gerencial denominada:",
+        options: ["A) Ciclo de PDCA quantitativo", "B) Matriz GUT (Gravidade, Urgência e Tendência)", "C) Análise de Redes de Pertence", "D) Diagrama de Ishikawa Tático"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "75. Na Matriz GUT aplicada à atividade policial, a pontuação técnica final de cada caso é obtida por meio de:",
+        options: ["A) Soma simples dos fatores (G + U + T)", "B) Multiplicação dos fatores (G x U x T)", "C) Subtração da urgência em relação à gravidade", "D) Média aritmética ponderada dividida por dez"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "76. A volatilidade da prova digital exige atenção especial ao vetor Urgência da Matriz GUT devido:",
+        options: ["A) Ao tempo de decaimento rápido e risco de sobreposição de logs de IP e circuitos de CFTV", "B) À pressão constante exercida por políticos locais no caso", "C) Ao valor econômico dos dispositivos eletrônicos apreendidos", "D) À necessidade de bater metas puramente estatísticas da delegacia"],
+        answer: 0
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "77. Um crime contra a vida ocorrido há 20 anos apresenta, na lógica gerencial da Matriz GUT:",
+        options: ["A) Urgência máxima e gravidade mínima", "B) Gravidade máxima e urgência estabilizada", "C) Tendência de agravamento rápido e letal", "D) Pontuação zero em todos os requisitos técnicos"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "78. A estrutura formal de uma Ordem de Missão viável deve rejeitar ambiguidades e conter delimitados:",
+        options: ["A) Apenas o nome das viaturas padronizadas", "B) O Foco (alvo), a Equipe, a Janela Temporal e o Escopo da Diligência", "C) As opiniões pessoais dos investigadores de campo", "D) Os dados de contas bancárias de todos os policiais"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "79. O que ocorre com a prova coletada se a equipe policial ultrapassar deliberadamente o escopo fixado na OM?",
+        options: ["A) A prova é validada pelo princípio da eficiência", "B) O inquérito pode ser fulminado por desvio de finalidade e ilegalidade", "C) Os policiais recebem bonificação salarial por produtividade", "D) O processo é enviado diretamente ao Supremo Tribunal Federal"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 8: A Gestão da Seção (O Vetor da Ação e a OM)",
+        question: "80. O uso de ferramentas gerenciais baseadas em algoritmos e matrizes técnicas serve como escudo para a chefia contra:",
+        options: ["A) A obrigatoriedade de trabalhar nos plantões", "B) Pressões externas, políticas ou de clamor midiático subjetivo", "C) A realização de testes físicos anuais", "D) O cumprimento das decisões expedidas pelo Poder Judiciário"],
+        answer: 1
+      },
+
+      // TÓPICO 9
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "81. O Princípio de inteligência que dita que o acesso a dados sigilosos deve se limitar a quem realmente precisa deles para a missão é:",
+        options: ["A) Princípio da Publicidade Mitigada", "B) Princípio da Necessidade de Conhecer (Need-to-Know)", "C) Princípio da Hierarquia Dinâmica", "D) Princípio da Eficiência Cartorária"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "82. A compartimentação de informações críticas atua na unidade policial como uma doutrina essencial de:",
+        options: ["A) Promoção da discórdia interna", "B) Contrainteligência e mitigação de rupturas sistêmicas", "C) Centralização de lucros operacionais", "D) Dispersão de procedimentos investigativos"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "83. Conforme a Constituição Federal de 1988 (Art. 144, § 4º), as Polícias Civis são dirigidas por:",
+        options: ["A) Oficiais da Polícia Militar do Estado", "B) Delegados de Polícia de carreira", "C) Peritos Criminais de classe especial", "D) Promotores de Justiça da Infância"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "84. Com a unificação de cargos na PCCE em 2025, o Oficial Investigador passou a ser o guardião integral de quais frentes?",
+        options: ["A) Execução de campo e formalização processual (cartório)", "B) Trânsito urbano e policiamento de guardas municipais", "C) Execução fiscal e auditoria de contas do Estado", "D) Vigilância penitenciária e perícia médica legal"],
+        answer: 0
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "85. Quem exerce a função vital de Filtro de Qualidade e Legalidade dos relatórios (ROM/RIP) antes do envio ao Delegado?",
+        options: ["A) O estagiário de direito mais antigo", "B) O Oficial Investigador Chefe da Seção", "C) O escrivão plantonista da comarca", "D) O assessor de comunicação social"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "86. O manual estabelece que a autoridade do Oficial Investigador Chefe perante a equipe emana da:",
+        options: ["A) Mera portaria burocrática de sua nomeação", "B) Sua 'Dívida de Honra' para com a operação (liderança pelo exemplo e vanguarda)", "C) Quantidade de medalhas honoríficas recebidas", "D) Sua capacidade de evitar missões de campo complexas"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "87. O controle administrativo de viaturas, coletes balísticos e armamentos pela chefia da Seção visa afastar:",
+        options: ["A) A fiscalização do Ministério Público apenas", "B) Negligência administrativa e riscos desnecessários de morte em combate", "C) O preenchimento diário de planilhas eletrônicas", "D) A interferência das diretrizes da SENASP"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "88. Qual lei estadual rege o Estatuto dos Policiais Civis do Ceará, regulando assiduidade e conduta moral?",
+        options: ["A) Lei Estadual nº 12.124/1993", "B) Portaria Normativa nº 01/2020", "C) Lei Federal nº 12.850/2013", "D) Decreto-Lei nº 3.689/1941"],
+        answer: 0
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "89. A alocação de perfis corretos para as tarefas corretas na Seção significa direcionar policiais com perfil analítico para:",
+        options: ["A) Entradas táticas em ambientes confinados (CQB)", "B) Cruzamento de dados financeiros e análises de OSINT", "C) Condução veloz de viaturas em perseguição", "D) Abordagem física de suspeitos em vias públicas"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 9: Liderança Operacional, Compartimentação e Administração",
+        question: "90. Sem a devida e precisa formalização cartorária dos atos de rua, a melhor incursão tática:",
+        options: ["A) Mantém sua validade jurídica intocada", "B) Perde o seu valor jurídico e a eficácia processual no Tribunal", "C) Torna-se automaticamente um segredo de justiça eterno", "D) É distribuída para a competência da Justiça Militar"],
+        answer: 1
+      },
+
+      // TÓPICO 10
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "91. Qual protocolo internacional estruturado em 5 fases é adotado no planejamento do Briefing policial?",
+        options: ["A) Protocolo PDCA", "B) Protocolo SMEAC (Situação, Missão, Execução, Administração, Comando)", "C) Protocolo SWOT de Perímetro", "D) Protocolo de Boston para Crises"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "92. No combate em ambiente confinado (CQB), o pico de adrenalina induz a sintomas biológicos como:",
+        options: ["A) Visão panorâmica e bradicardia", "B) Visão de túnel, exclusão auditiva e taquipsiquia", "C) Relaxamento cognitivo e motricidade fina apurada", "D) Sono profundo instantâneo"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "93. A 'Lei de Hick' preceitua que, sob estresse severo, o tempo de reação humana aumenta quanto mais:",
+        options: ["A) Equipamentos táticos o operador estiver portando", "B) Opções de decisão o cérebro do operador possuir", "C) Iluminado estiver o ambiente da incursão", "D) Policiais estiverem participando da varredura"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "94. A avaliação tática e física rápida realizada pela equipe ainda na viatura ou perímetro seguro imediato chama-se:",
+        options: ["A) Hot Wash", "B) Debriefing Formal", "C) SMEAC pós-crime", "D) Auditoria de Cartório"],
+        answer: 0
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "95. A incapacidade de se desligar do estado de hipervigilância vital após o plantão pode induzir o operador ao:",
+        options: ["A) Superavit cognitivo institucional", "B) Esgotamento crônico profissional (Síndrome de Burnout)", "C) Aumento da performance operacional na folga", "D) Equilíbrio homeostático perfeito"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "96. A Doutrina do Homem Cinzento (Grey Man) atua no nível tático-individual como um protocolo de:",
+        options: ["A) Ostensividade total em áreas de lazer", "B) Contrainteligência individual e capacidade de existir no anonimato privado", "C) Uso obrigatório de fardamento camuflado militarizado na folga", "D) Exposição diária de rotinas profissionais na internet"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "97. A conduta de postar fotos de distintivos, armas e fardamentos em redes sociais pessoais é expressamente proibida pela:",
+        options: ["A) Lei Federal nº 13.709/2018", "B) Portaria Normativa nº 01/2020 do Gabinete do Delegado-Geral da PCCE", "C) Lei de Abuso de Autoridade", "D) Doutrina Nacional de Inteligência (DNISP) de 1988"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "98. Qual lei de 2024 instituiu o Feminicídio como crime autônomo no ordenamento jurídico brasileiro?",
+        options: ["A) Lei nº 13.964/2019", "B) Lei nº 14.994/2024", "C) Lei nº 12.124/1993", "D) Lei nº 13.709/2018"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "99. Nos termos da nova legislação de 2024, a investigação de mortes de mulheres por razões de gênero deve ser capitulada no artigo:",
+        options: ["A) 121, § 2º, inciso VI do CP", "B) 121-A do Código Penal Brasileiro", "C) 158-A do Código de Processo Penal", "D) 23 do Estatuto da Polícia Civil"],
+        answer: 1
+      },
+      {
+        topic: "Tópico 10: O Planejamento do Briefing, Operação Policial e Investigação de Homicídios/Feminicídios",
+        question: "100. A intervenção isolada à paisana, motivada por impulsos egóicos e sem apoio tático, descreve a perigosa:",
+        options: ["A) Frieza Tática Operacional", "B) Síndrome do Herói (Mito do Herói)", "C) Tática do Carcaju Avançada", "D) Doutrina de Sobrevivência do Grey Man"],
+        answer: 1
+      }
+    ];
+
+    // ESTADO DA APLICAÇÃO
+    let currentQuestionIndex = 0;
+    let userAnswers = new Array(questions.length).fill(null);
+
+    // ELEMENTOS DO DOM
+    const topicBadgeEl = document.getElementById("topic-badge");
+    const progressTextEl = document.getElementById("progress-text");
+    const progressBarEl = document.getElementById("progress-bar");
+    const jumpSelectEl = document.getElementById("jump-select");
+    const questionTextEl = document.getElementById("question-text");
+    const optionsContainerEl = document.getElementById("options-container");
+    const prevBtnEl = document.getElementById("prev-btn");
+    const nextBtnEl = document.getElementById("next-btn");
+    const quizScreenEl = document.getElementById("quiz-screen");
+    const resultScreenEl = document.getElementById("result-screen");
+    const scoreNumEl = document.getElementById("score-num");
+    const percentageTextEl = document.getElementById("percentage-text");
+
+    // Inicialização do Select de salto de questões
+    function initJumpSelect() {
+      jumpSelectEl.innerHTML = "";
+      questions.forEach((_, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = `Q. ${i + 1}`;
+        jumpSelectEl.appendChild(opt);
+      });
+    }
+
+    // Carregar Questão Atual
+    function loadQuestion() {
+      const q = questions[currentQuestionIndex];
+
+      topicBadgeEl.textContent = q.topic;
+      progressTextEl.textContent = `Questão ${currentQuestionIndex + 1} de ${questions.length}`;
+      progressBarEl.style.width = `${((currentQuestionIndex + 1) / questions.length) * 100}%`;
+      jumpSelectEl.value = currentQuestionIndex;
+
+      questionTextEl.textContent = q.question;
+      optionsContainerEl.innerHTML = "";
+      const answered = userAnswers[currentQuestionIndex] !== null;
+
+      q.options.forEach((optText, index) => {
+        const button = document.createElement("button");
+        button.classList.add("option-btn");
+        button.textContent = optText;
+
+        if (answered) {
+          button.disabled = true;
+          const selected = userAnswers[currentQuestionIndex];
+          if (index === q.answer) {
+            button.classList.add("correct");
+          }
+          if (index === selected && selected !== q.answer) {
+            button.classList.add("incorrect");
+          }
+        } else {
+          button.addEventListener("click", () => selectOption(index));
+        }
+
+        optionsContainerEl.appendChild(button);
+      });
+
+      prevBtnEl.disabled = currentQuestionIndex === 0;
+      if (currentQuestionIndex === questions.length - 1) {
+        nextBtnEl.textContent = "Finalizar Prova";
+      } else {
+        nextBtnEl.textContent = "Próxima";
+      }
+
+      // Salva progresso no navegador automaticamente
+      autoSaveToLocalStorage();
+    }
+
+    // Seleção de alternativa
+    function selectOption(index) {
+      userAnswers[currentQuestionIndex] = index;
+      loadQuestion();
+    }
+
+    // Navegação
+    function nextQuestion() {
+      if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        loadQuestion();
+      }
+    }
+
+    function jumpToQuestion(index) {
+      currentQuestionIndex = parseInt(index, 10);
+      loadQuestion();
+    }
+
+    // --- FUNÇÕES DO GERENCIADOR DE SAVE (EXPORTAR / IMPORTAR) ---
+
+    // 1. Exportar progresso para um arquivo .json
+    function exportSave() {
+      const saveData = {
+        title: "Simulado CFO PCCE 2026",
+        savedAt: new Date().toLocaleString("pt-BR"),
+        currentQuestionIndex: currentQuestionIndex,
+        userAnswers: userAnswers
+      };
+
+      const jsonStr = JSON.stringify(saveData, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `simulado_pcce_save_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // 2. Importar progresso de um arquivo .json
+    function importSave(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data && Array.isArray(data.userAnswers) && data.userAnswers.length === questions.length) {
+            userAnswers = data.userAnswers;
+            currentQuestionIndex = typeof data.currentQuestionIndex === 'number' ? data.currentQuestionIndex : 0;
+            
+            // Garantir visualização no Quiz
+            resultScreenEl.classList.add("hide");
+            quizScreenEl.classList.remove("hide");
+            
+            loadQuestion();
+            alert("✅ Save carregado com sucesso! Suas respostas anteriores foram restauradas.");
+          } else {
+            alert("❌ O arquivo selecionado não é compatível com este simulado.");
+          }
+        } catch (err) {
+          alert("❌ Erro ao ler o arquivo de save.");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = ""; // Limpa a seleção do arquivo
+    }
+
+    // 3. Auto-save via localStorage
+    function autoSaveToLocalStorage() {
+      const state = {
+        currentQuestionIndex: currentQuestionIndex,
+        userAnswers: userAnswers
+      };
+      localStorage.setItem("pcce_quiz_autosave", JSON.stringify(state));
+    }
+
+    function autoLoadFromLocalStorage() {
+      const saved = localStorage.getItem("pcce_quiz_autosave");
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (Array.isArray(data.userAnswers) && data.userAnswers.length === questions.length) {
+            userAnswers = data.userAnswers;
+            currentQuestionIndex = data.currentQuestionIndex || 0;
+          }
+        } catch (e) {
+          console.error("Erro no auto-load", e);
+        }
+      }
+    }
+
+    // 4. Resetar todo o progresso
+    function resetProgress() {
+      if (confirm("Tem certeza que deseja zerar todas as suas respostas do simulado?")) {
+        userAnswers.fill(null);
+        currentQuestionIndex = 0;
+        localStorage.removeItem("pcce_quiz_autosave");
+        resultScreenEl.classList.add("hide");
+        quizScreenEl.classList.remove("hide");
+        loadQuestion();
+      }
+    }
+
+    // Exibir Resultado Final
+    function showResults() {
+      let score = 0;
+      userAnswers.forEach((ans, idx) => {
+        if (ans === questions[idx].answer) {
+          score++;
+        }
+      });
+
+      quizScreenEl.classList.add("hide");
+      resultScreenEl.classList.remove("hide");
+
+      scoreNumEl.textContent = score;
+      const pct = Math.round((score / questions.length) * 100);
+      percentageTextEl.textContent = `${pct}% de aproveitamento`;
+    }
+
+    // Reiniciar Quiz
+    function restartQuiz() {
+      resetProgress();
+    }
+
+    // Iniciar Sistema
+    initJumpSelect();
+    autoLoadFromLocalStorage();
+    loadQuestion();
+  </script>
+</body>
+</html>
